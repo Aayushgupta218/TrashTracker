@@ -3,6 +3,8 @@ import axios from 'axios';
 import './AuthPage.css';
 import { useNavigate } from 'react-router-dom'; 
 
+const link = "https://trashtracker-backend-0vqq.onrender.com";
+
 const AuthPage = ({ setToken }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
@@ -11,8 +13,6 @@ const AuthPage = ({ setToken }) => {
     const [errors, setErrors] = useState({});
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate(); 
-
-    const link = "https://trashtracker-backend-0vqq.onrender.com";
     
     const validate = () => {
         let emailError = '';
