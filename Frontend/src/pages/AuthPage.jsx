@@ -12,6 +12,8 @@ const AuthPage = ({ setToken }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate(); 
 
+    const link = "https://trashtracker-backend-0vqq.onrender.com";
+    
     const validate = () => {
         let emailError = '';
         let passwordError = '';
@@ -41,7 +43,7 @@ const AuthPage = ({ setToken }) => {
         const isValid = validate();
         if (isValid) {
             try {
-                const url = isLogin ? 'http://localhost:2000/api/login' : 'http://localhost:2000/api/register';
+                const url = isLogin ? 'link/api/login' : 'link/api/register';
                 const response = await axios.post(url, { email, password, role });
                 if (isLogin) {
                     const token = response.data.token;
