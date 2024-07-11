@@ -8,6 +8,7 @@ const GarbageReport = ({ token }) => {
     const [message, setMessage] = useState('');
     const [userAddress, setUserAddress] = useState('');
 
+    const link = "https://trashtracker-backend-0vqq.onrender.com"
     const getLocation = () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
@@ -75,7 +76,7 @@ const GarbageReport = ({ token }) => {
         formData.append('image', image);
 
         try {
-            await axios.post('http://localhost:2000/api/garbage-report', formData, {
+            await axios.post('link/api/garbage-report', formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'
