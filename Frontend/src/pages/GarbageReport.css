@@ -1,0 +1,137 @@
+body {
+    background-image: url("Untitled design (2).png");
+    background-size: cover;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+.garbage-report-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    background: black;
+    opacity: 0.7;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.garbage-report-container h2 {
+    font-size: 32px;
+    color: goldenrod;
+    margin-bottom: 20px;
+}
+
+.garbage-report-container button,
+.garbage-report-container .form-group button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 10px 5px;
+    background: goldenrod;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.garbage-report-container button:hover,
+.garbage-report-container .form-group button:hover {
+    background: rgb(184, 177, 177);
+    color: black;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 91, 187, 0.3);
+}
+
+.garbage-report-container .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.garbage-report-container .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.garbage-report-container .form-group input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #f7f7f7;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.garbage-report-container .form-group input[type="file"]::file-selector-button {
+    padding: 8px 12px;
+    background-color: goldenrod;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.garbage-report-container .form-group input[type="file"]::file-selector-button:hover {
+    background-color: #0056b3;
+}
+
+.garbage-report-container .form-group input[type="file"]:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.garbage-report-container p {
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.garbage-report-container .location-display {
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    color: black; /* Changed to black for better visibility */
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Error message styles */
+.garbage-report-container .error {
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+#map {
+    margin-top: 20px;
+    height: 400px;
+    width: 100%;
+}
+
+#street-view {
+    margin-top: 20px;
+    height: 400px;
+    width: 100%;
+}
+
+.map-container {
+    height: 400px;
+    width: 100%;
+}
+
+.street-view-container {
+    height: 400px;
+    width: 100%;
+}
