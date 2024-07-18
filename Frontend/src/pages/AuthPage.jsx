@@ -43,7 +43,7 @@ const AuthPage = ({ setToken }) => {
         const isValid = validate();
         if (isValid) {
             try {
-                const url = isLogin ? 'link/api/login' : 'link/api/register';
+                const url = isLogin ? `${link}/api/login` : `${link}/api/register`; 
                 const response = await axios.post(url, { email, password, role });
                 if (isLogin) {
                     const token = response.data.token;
