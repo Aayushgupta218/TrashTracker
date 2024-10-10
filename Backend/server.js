@@ -173,6 +173,8 @@ app.delete('/api/garbage-report/:id',  authenticateToken, async (req, res) => {
 
 app.use('/uploads', express.static('uploads'));
 
-app.listen(2000, () => {
+const port = process.env.PORT || 2000;
+
+app.listen(port, () => {
     console.log('Server is running on port 2000');
 });

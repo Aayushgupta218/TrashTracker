@@ -3,6 +3,8 @@ import axios from 'axios';
 import './AuthPage.css';
 import { useNavigate } from 'react-router-dom'; 
 
+const link = "https://trashtracker-backend-0vqq.onrender.com";
+
 const AuthPage = ({ setToken }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
@@ -11,7 +13,7 @@ const AuthPage = ({ setToken }) => {
     const [errors, setErrors] = useState({});
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate(); 
-
+    
     const validate = () => {
         let emailError = '';
         let passwordError = '';
@@ -41,7 +43,7 @@ const AuthPage = ({ setToken }) => {
         const isValid = validate();
         if (isValid) {
             try {
-                const url = isLogin ? 'http://localhost:2000/api/login' : 'http://localhost:2000/api/register';
+                const url = isLogin ? `${link}/api/login` : `${link}/api/register`; // Fixed URL
                 const response = await axios.post(url, { email, password, role });
                 if (isLogin) {
                     const token = response.data.token;
@@ -115,6 +117,5 @@ const AuthPage = ({ setToken }) => {
         </div>
     );
 };
-
 
 export default AuthPage;
