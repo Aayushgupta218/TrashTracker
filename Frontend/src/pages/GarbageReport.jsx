@@ -5,21 +5,25 @@ import './GarbageReport.css';
 const GarbageReport = ({ token }) => {
     const [location, setLocation] = useState({ latitude: null, longitude: null });
     const [image, setImage] = useState(null);
+    const [receiverEmail, setReceiverEmail] = useState('');
     const [message, setMessage] = useState('');
     const [userAddress, setUserAddress] = useState('');
 
     const getLocation = () => {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                setLocation({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                });
-                setMessage('Location obtained successfully.');
-            }, (error) => {
-                console.error('Error accessing location:', error);
-                setMessage('Error accessing location.');
-            });
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLocation({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                    setMessage('Location obtained successfully.');
+                },
+                (error) => {
+                    console.error('Error accessing location:', error);
+                    setMessage('Error accessing location.');
+                }
+            );
         } else {
             console.error('Geolocation is not supported by this browser.');
             setMessage('Geolocation is not supported by this browser.');
@@ -45,11 +49,14 @@ const GarbageReport = ({ token }) => {
                 if (response.data.results && response.data.results[0]) {
                     setUserAddress(response.data.results[0].formatted);
                 } else {
-                    setMessage('Unable to retrieve address.');
+                    console.warn('Unable to retrieve address.');
+                    setUserAddress('Unknown Address');
+                    setMessage('Unable to retrieve address. Using "Unknown Address".');
                 }
             } catch (error) {
                 console.error('Error fetching address:', error);
-                setMessage('Error fetching address.');
+                setUserAddress('Unknown Address');
+                setMessage('Error fetching address. Using "Unknown Address".');
             }
         }
     };
@@ -68,11 +75,17 @@ const GarbageReport = ({ token }) => {
             setMessage('Please upload an image.');
             return;
         }
+        if (!receiverEmail) {
+            setMessage('Please provide the receiver\'s email.');
+            return;
+        }
+
         const formData = new FormData();
         formData.append('latitude', location.latitude);
         formData.append('longitude', location.longitude);
-        formData.append('address', userAddress);
+        formData.append('address', userAddress || 'Unknown Address'); // Fallback address if userAddress is empty
         formData.append('image', image);
+        formData.append('receiverEmail', receiverEmail);
 
         try {
             await axios.post('http://localhost:2000/api/garbage-report', formData, {
@@ -103,6 +116,16 @@ const GarbageReport = ({ token }) => {
                 <div className="form-group">
                     <label htmlFor="image">Upload Image:</label>
                     <input type="file" id="image" accept="image/*" onChange={handleImageChange} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="receiverEmail">Receiver Email:</label>
+                    <input
+                        type="email"
+                        id="receiverEmail"
+                        value={receiverEmail}
+                        onChange={(e) => setReceiverEmail(e.target.value)}
+                        placeholder="Enter receiver's email"
+                    />
                 </div>
                 <div className="form-group">
                     <button type="submit">Submit Report</button>

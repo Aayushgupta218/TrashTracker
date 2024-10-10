@@ -109,6 +109,7 @@ const AuthPage = ({ setToken }) => {
                     <button className="toggle-btn" onClick={() => setIsLogin(!isLogin)}>
                         {isLogin ? "Don't have an account? Register" : "Already have an account? Login"}
                     </button>
+                    <iframe className="chat-bot" width="350" height="300" allow="microphone;" src="https://console.dialogflow.com/api-client/demo/embedded/b60d498c-5bf0-4af1-a693-a955e63834dc"></iframe>
                 </>
             ) : <div>Logged In</div>}
         </div>
