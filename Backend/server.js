@@ -9,8 +9,6 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import User from './model/User.js';
 import GarbageReport from './model/GarbageReport.js';
-// import { sendMail } from './gmailService.js'; 
-import { exec } from 'child_process';
 
 dotenv.config();
 
@@ -175,7 +173,9 @@ app.delete('/api/garbage-report/:id',  authenticateToken, async (req, res) => {
 
 app.use('/uploads', express.static('uploads'));
 
-app.listen(2000, () => {
+const port = process.env.PORT || 2000;
+
+app.listen(port, () => {
     console.log('Server is running on port 2000');
 });
 
