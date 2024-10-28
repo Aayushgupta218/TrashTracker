@@ -1,11 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import ChoroplethMap from './ChloroplethMap';
 import './MunicipalDashboard.css';
+import 'leaflet/dist/leaflet.css';
 
 const MunicipalDashboard = ({ token, onLogout }) => {
     const [reports, setReports] = useState([]);
+    const [geoJsonData, setGeoJsonData] = useState(null);
+    const [sectorData, setSectorData] = useState({});
     const [message, setMessage] = useState('');
     const [timers, setTimers] = useState({});
+    const [error, setError] = useState(null);
+    const [showMap, setShowMap] = useState(false);
+
+    const toggleMapVisibility = () => {
+        setShowMap(prevShowMap => !prevShowMap);
+    };
 
     const fetchReports = useCallback(async () => {
         try {
@@ -13,6 +23,7 @@ const MunicipalDashboard = ({ token, onLogout }) => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setReports(response.data);
+
             // Initialize timers for in-progress reports
             const newTimers = {};
             response.data.forEach(report => {
@@ -21,10 +32,53 @@ const MunicipalDashboard = ({ token, onLogout }) => {
                 }
             });
             setTimers(newTimers);
+
+            const geoJsonData = {
+                type: "FeatureCollection",
+                features: response.data.map(report => {
+                    const address = report.address || '';
+                    console.log("Address:", address);
+                    const match = /(?:[Ss]ector\s*[\-]*\s*(\d+))/i.exec(address); 
+                    const sectorNumber = match ? match[1] : 'Unknown'; 
+
+                    return {
+                        type: "Feature",
+                        geometry: {
+                            type: "Point",
+                            coordinates: [report.location.longitude, report.location.latitude]
+                        },
+                        properties: {
+                            name: report.sectorName,
+                            sectorNumber: sectorNumber, 
+                            frequency: report.frequency || 0 
+                        }
+                    };
+                })
+            };
+            console.log("GeoJSON Data:", geoJsonData);
+            setGeoJsonData(geoJsonData);
+            const sectorFrequency = preprocessData(response.data);
+            console.log("Sector Frequency Data:", sectorFrequency); // Log sector data
+            setSectorData(sectorFrequency);
+        
         } catch (error) {
             console.error('Error fetching reports:', error);
+            setError('Error fetching reports.');
         }
     }, [token]);
+
+    const preprocessData = (reports) => {
+        const sectorFrequency = {};
+        reports.forEach(report => {
+            const address = report.address || '';
+            const match = /[Ss]ector\s+(\d+)/.exec(address);
+            if (match) {
+                const sector = match[1];
+                sectorFrequency[sector] = (sectorFrequency[sector] || 0) + 1;
+            }
+        });
+        return sectorFrequency;
+    };
 
     useEffect(() => {
         fetchReports();
@@ -125,49 +179,59 @@ const MunicipalDashboard = ({ token, onLogout }) => {
                 <h2>MUNICIPAL DASHBOARD</h2>
                 <button className="logout-button" onClick={onLogout}>Logout</button>
             </div>
+
+            {error && <p className="error-message">{error}</p>}
             {message && <p className="message">{message}</p>}
             <div className="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Location</th>
-                        <th>Status</th>
-                        <th>Estimated Completion Time</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {reports.map(report => (
-                        <tr key={report._id} className={getRowClassName(report)}>
-                            <td>{report._id}</td>
-                            <td>{report.address}</td>
-                            <td>{report.status}</td>
-                            <td>
-                                {report.status === 'completed' || report.status === 'failed' ? '-' : 
-                                 report.status === 'in-progress' ? calculateRemainingTime(report._id) : 
-                                 <input 
-                                     type="datetime-local" 
-                                     onChange={(e) => handleUpdate(report._id, 'in-progress', e.target.value)}
-                                 />
-                                }
-                            </td>
-                            <td>
-                                {report.status !== 'completed' && report.status !== 'failed' && (
-                                    <button 
-                                        className="completed" 
-                                        onClick={() => handleUpdate(report._id, 'completed')}
-                                    >
-                                        Mark Completed
-                                    </button>
-                                )}
-                                <button className="delete" onClick={() => handleDelete(report._id)}>Delete</button>
-                            </td>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Estimated Completion Time</th>
+                            <th>Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {reports.map(report => (
+                            <tr key={report._id} className={getRowClassName(report)}>
+                                <td>{report._id}</td>
+                                <td>{report.address}</td>
+                                <td>{report.status}</td>
+                                <td>
+                                    {report.status === 'completed' || report.status === 'failed' ? '-' : 
+                                     report.status === 'in-progress' ? calculateRemainingTime(report._id) : 
+                                     <input 
+                                         type="datetime-local" 
+                                         onChange={(e) => handleUpdate(report._id, 'in-progress', e.target.value)}
+                                     />
+                                    }
+                                </td>
+                                <td>
+                                    {report.status !== 'completed' && report.status !== 'failed' && (
+                                        <button 
+                                            className="completed" 
+                                            onClick={() => handleUpdate(report._id, 'completed')}
+                                        >
+                                            Mark Completed
+                                        </button>
+                                    )}
+                                    <button className="delete" onClick={() => handleDelete(report._id)}>Delete</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
+            <button onClick={toggleMapVisibility}>
+                {showMap ? "Hide Map" : "Display Map"}
+            </button>
+            {showMap && geoJsonData && (
+                <div className="map-container">
+                    <ChoroplethMap geoJsonData={geoJsonData} sectorData={sectorData} />
+                </div>
+            )}
         </div>
     );
 };

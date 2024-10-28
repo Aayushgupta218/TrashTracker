@@ -83,7 +83,7 @@ const GarbageReport = ({ token }) => {
         const formData = new FormData();
         formData.append('latitude', location.latitude);
         formData.append('longitude', location.longitude);
-        formData.append('address', userAddress || 'Unknown Address'); // Fallback address if userAddress is empty
+        formData.append('address', userAddress || 'Unknown Address'); 
         formData.append('image', image);
         formData.append('receiverEmail', receiverEmail);
 

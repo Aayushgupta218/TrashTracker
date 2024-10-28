@@ -9,14 +9,37 @@ body {
     height: 100vh;
 }
 
+.welcome-banner {
+    width: 95%;
+    text-align: center;
+    padding: 10px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background-color: #a3b75a;
+    opacity: 85%;
+    color:#faf6f6;
+}
+
+.tagline{
+    font-size: 1.0rem;
+}
+
+.slogan{
+    font-size: 1.5rem;
+    color:black;
+    text-align: center;
+    font-weight: bold;
+}
+
 .auth-container {
-    background: #f4e8a0;
+    background: #fefefc;
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 400px;
     max-width: 100%;
     text-align: center;
+    margin-top: 30px;
 }
 
 .auth-form h2 {

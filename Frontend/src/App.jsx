@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-route
 import AuthPage from './pages/AuthPage';
 import GarbageReport from './pages/GarbageReport';
 import MunicipalDashboard from './pages/MunicipalDashboard';
+import ChoroplethMap from './pages/ChloroplethMap';
 
 const Main = ({ token, setToken }) => {
     const navigate = useNavigate();

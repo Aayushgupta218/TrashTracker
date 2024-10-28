@@ -7,7 +7,7 @@
     background-attachment: fixed;
     background-repeat: no-repeat;
     background-size: cover;
-    overflow: hidden; /* Prevent downward scrolling */
+    overflow: auto; /* Ensure content stays within bounds */
 }
 
 .dashboard-header {
@@ -19,6 +19,20 @@
     top:0;
     z-index:10;
     
+}
+
+.map-toggle-button {
+    margin: 10px 0;
+    padding: 10px 15px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.map-toggle-button:hover {
+    background-color: #45a049;
 }
 
 .table-container {
@@ -162,4 +176,10 @@ button {
 .start-timer:disabled {
     background-color: #ccc;
     cursor: not-allowed;
+}
+
+.map-container {
+    height: 500px; /* Or any appropriate height */
+    width: 100%;
+    margin: 20px 0;
 }
