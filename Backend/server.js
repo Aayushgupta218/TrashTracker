@@ -9,10 +9,13 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import User from './model/User.js';
 import GarbageReport from './model/GarbageReport.js';
+// import { sendMail } from './gmailService.js'; 
+import { exec } from 'child_process';
 
 dotenv.config();
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
@@ -88,13 +91,12 @@ const transporter = nodemailer.createTransport({
 });
 
 app.post('/api/garbage-report', upload.single('image'), async (req, res) => {
-
     try {
         const token = req.headers.authorization.split(' ')[1];
         const decoded = jwt.verify(token, 'your_jwt_secret');
         const userId = decoded.id;
 
-        const { latitude, longitude, address } = req.body; 
+        const { latitude, longitude, address, receiverEmail } = req.body; // Receive receiver email from frontend
         const location = { latitude, longitude };
         const imageUrl = `/uploads/${req.file.filename}`;
 
@@ -105,17 +107,17 @@ app.post('/api/garbage-report', upload.single('image'), async (req, res) => {
 
         const mailOptions = {
             from: 'aggarwalaayush220@gmail.com',
-            to: 'nagpaladi05@gmail.com', 
+            to: receiverEmail, 
             subject: 'Garbage Collection Report',
             text: `A new garbage collection report has been submitted for the location: 
                    Latitude: ${latitude}, Longitude: ${longitude}.
                    Address: ${address}`,
-                   attachments: [
-                    {
-                        filename: req.file.filename,
-                        path: imagePath
-                    }
-                ]
+            attachments: [
+                {
+                    filename: req.file.filename,
+                    path: imagePath
+                }
+            ]
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -130,6 +132,7 @@ app.post('/api/garbage-report', upload.single('image'), async (req, res) => {
         res.status(500).json({ message: 'Error submitting garbage report', error });
     }
 });
+
 
 app.get('/api/municipal/reports', authenticateToken, authorizeRoles(['committee']),
 async (req, res) => {
@@ -175,3 +178,5 @@ app.use('/uploads', express.static('uploads'));
 app.listen(2000, () => {
     console.log('Server is running on port 2000');
 });
+
+

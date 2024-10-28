@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './AuthPage.css';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 
 const AuthPage = ({ setToken }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('user'); 
+    const [role, setRole] = useState('user');
     const [errors, setErrors] = useState({});
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
 
     const validate = () => {
         let emailError = '';
@@ -43,20 +43,26 @@ const AuthPage = ({ setToken }) => {
             try {
                 const url = isLogin ? 'http://localhost:2000/api/login' : 'http://localhost:2000/api/register';
                 const response = await axios.post(url, { email, password, role });
+
                 if (isLogin) {
                     const token = response.data.token;
                     localStorage.setItem('token', token);
                     setToken(token);
                     setIsLoggedIn(true);
                     console.log('Logged in with:', { email, password });
-                    
-                    const decodedToken = JSON.parse(atob(token.split('.')[1]));
-                    const userRole = decodedToken.role;
 
-                    if (userRole === 'committee') {
-                        navigate('/municipal-dashboard');
-                    } else {
-                        navigate('/garbage-report');
+                    try {
+                        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+                        const userRole = decodedToken.role;
+
+                        if (userRole === 'committee') {
+                            navigate('/municipal-dashboard');
+                        } else {
+                            navigate('/garbage-report');
+                        }
+                    } catch (error) {
+                        console.error('Error decoding token:', error);
+                        setErrors({ api: 'Error processing login. Please try again.' });
                     }
                 } else {
                     console.log('Registered with:', { email, password, role });
@@ -64,56 +70,72 @@ const AuthPage = ({ setToken }) => {
                     setIsLogin(true);
                 }
             } catch (error) {
-                console.error(`${isLogin ? 'Login' : 'Registration'} failed:`, error);
+                console.error(`Error during ${isLogin ? 'login' : 'registration'}:`, error);
                 setErrors({ api: `${isLogin ? 'Login' : 'Registration'} failed. Please try again.` });
             }
         }
     };
 
     return (
-        <div className="auth-container">
-            {!isLoggedIn ? (
-                <>
-                    <form className="auth-form" onSubmit={handleSubmit}>
-                        <h2>{isLogin ? 'Login' : 'Register'}</h2>
-                        <div className="form-group">
-                            <label>Email</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                            {errors.email && <span className="error">{errors.email}</span>}
-                        </div>
-                        <div className="form-group">
-                            <label>Password</label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                            {errors.password && <span className="error">{errors.password}</span>}
-                        </div>
-                        {!isLogin && (
+        <div className="auth-page-wrapper">
+            <div className="slogan"> Raise Your Voice With </div>
+            <div className="welcome-banner">
+                TRASH-TRACKER
+                <div className="tagline">(A citizen-powered waste reporting system)</div>
+            </div>
+            <div className="auth-container">
+                {!isLoggedIn ? (
+                    <>
+                        <form className="auth-form" onSubmit={handleSubmit}>
+                            <h2>{isLogin ? 'Login' : 'Register'}</h2>
                             <div className="form-group">
-                                <label>Role</label>
-                                <select value={role} onChange={(e) => setRole(e.target.value)}>
-                                    <option value="user">User</option>
-                                    <option value="committee">Committee</option>
-                                </select>
+                                <label>Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                                {errors.email && <span className="error">{errors.email}</span>}
                             </div>
-                        )}
-                        {errors.api && <span className="error">{errors.api}</span>}
-                        <button type="submit">{isLogin ? 'Login' : 'Register'}</button>
-                    </form>
-                    <button className="toggle-btn" onClick={() => setIsLogin(!isLogin)}>
-                        {isLogin ? "Don't have an account? Register" : "Already have an account? Login"}
-                    </button>
-                </>
-            ) : <div>Logged In</div>}
+                            <div className="form-group">
+                                <label>Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                                {errors.password && <span className="error">{errors.password}</span>}
+                            </div>
+                            {!isLogin && (
+                                <div className="form-group">
+                                    <label>Role</label>
+                                    <select value={role} onChange={(e) => setRole(e.target.value)}>
+                                        <option value="user">User</option>
+                                        <option value="committee">Committee</option>
+                                    </select>
+                                </div>
+                            )}
+                            {errors.api && <span className="error">{errors.api}</span>}
+                            <button type="submit">{isLogin ? 'Login' : 'Register'}</button>
+                        </form>
+                        <button className="toggle-btn" onClick={() => setIsLogin(!isLogin)}>
+                            {isLogin ? "Don't have an account? Register" : "Already have an account? Login"}
+                        </button>
+                    </>
+                ) : (
+                    <div>Logged In</div>
+                )}
+            </div>
+
+            <iframe
+                className="chat-bot"
+                width="350"
+                height="300"
+                allow="microphone;"
+                src="https://console.dialogflow.com/api-client/demo/embedded/b60d498c-5bf0-4af1-a693-a955e63834dc"
+            />
         </div>
     );
 };
-
 
 export default AuthPage;

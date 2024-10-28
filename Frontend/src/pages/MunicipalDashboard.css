@@ -1,145 +1,185 @@
 .municipal-dashboard-container {
-    margin: 20px;
-    font-family: 'Roboto', sans-serif;
-    background: url('background-image-url') no-repeat center center fixed;
-    background-size: cover;
     padding: 20px;
+    /* background: linear-gradient(to bottom right, #44446b, #e8e8ee); */
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    overflow: auto; /* Ensure content stays within bounds */
 }
 
-.municipal-dashboard-container h2 {
-    color: #333;
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 24px;
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* color: #fff; */
+    position:sticky;
+    top:0;
+    z-index:10;
+    
 }
 
-.municipal-dashboard-container table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-    background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.municipal-dashboard-container th,
-.municipal-dashboard-container td {
-    border: 1px solid #ddd;
+.map-toggle-button {
+    margin: 10px 0;
     padding: 10px 15px;
-}
-
-.municipal-dashboard-container th {
+    font-size: 16px;
     background-color: #4CAF50;
     color: white;
-    text-align: left;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.municipal-dashboard-container tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.municipal-dashboard-container tr:hover {
-    background-color: #f1f1f1;
-}
-
-.municipal-dashboard-container .completed-row {
-    background-color: #c8e6c9;
-}
-
-.municipal-dashboard-container .status-failed {
-    color: red;
-    font-weight: bold;
-}
-
-.municipal-dashboard-container .warning-sign {
-    color: red;
-    font-weight: bold;
-    margin-left: 10px;
-}
-
-.municipal-dashboard-container button {
-    margin: 5px;
-    padding: 8px 12px;
-    cursor: pointer;
     border: none;
-    color: white;
     border-radius: 5px;
+    cursor: pointer;
+}
+.map-toggle-button:hover {
+    background-color: #45a049;
+}
+
+.table-container {
+    max-height: 400px; /* Set max height for the table container */
+    overflow-y: auto; /* Enable vertical scrolling */
+    margin-top: 20px; /* Space between header and table */
+    background-color: #ddd;
+    color:black;
+}
+
+.logout-button {
+    background-color: #ddd;
+    color: black;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
     transition: background-color 0.3s ease;
 }
 
-.municipal-dashboard-container button.in-progress {
-    background-color: #FFA500;
+.logout-button:hover {
+    background-color: #ddd;
 }
 
-.municipal-dashboard-container button.completed {
-    background-color: #4CAF50;
+table {
+    width: 100%;
+    border-collapse: collapse;
+    /* margin-top: 20px;
+    background-color: #f9f9f9;
+    overflow: scroll; */
 }
 
-.municipal-dashboard-container button.delete {
+th, td {
+    border: 3px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    /* background-color: #4CAF50; */
+    background-color: #e7cb2c;
+    color: #fff;
+}
+
+.completed-row {
+    background-color: #c8e6c9;
+}
+
+.status-failed {
+    background-color: #ffebee;
+    color: #971d18;
+}
+
+.orange-row {
+    background-color: #ffcc80;
+    animation: orangeGlow 1s infinite alternate;
+}
+
+@keyframes orangeGlow {
+    from { box-shadow: 0 0 10px rgba(255, 165, 0, 0.8); }
+    to { box-shadow: 0 0 20px rgba(255, 165, 0, 1); }
+}
+
+button {
+    padding: 8px 12px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.completed {
+    background-color: #5cb85c;
+}
+
+.delete {
     background-color: #d9534f;
 }
 
-.municipal-dashboard-container button.disabled {
-    background-color: #ddd;
-    cursor: not-allowed;
-}
-
-.municipal-dashboard-container button:hover:not(.disabled) {
-    opacity: 0.9;
+.message {
+    text-align: center;
+    margin-top: 10px;
+    color: #bf120c;
 }
 
 .update-form {
     margin-top: 20px;
     padding: 20px;
     background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    position: relative;
 }
 
 .update-form h3 {
-    margin-bottom: 15px;
-    color: #333;
-    font-size: 20px;
-}
-
-.update-form div {
     margin-bottom: 15px;
 }
 
 .update-form label {
     display: block;
     margin-bottom: 5px;
-    color: #555;
+    font-weight: bold;
 }
 
 .update-form input, .update-form select {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 14px;
+    padding: 8px;
+    margin-bottom: 10px;
 }
 
-.update-form button {
-    background-color: #4CAF50;
+
+.completed-row {
+    background-color: #79c07c;  /* Light green */
+}
+
+.status-failed {
+    background-color: #c7747c;  /* Light red */
+}
+
+.status-pending {
+    background-color: #e8dd7d;  /* Light yellow */
+}
+
+.status-in-progress {
+    background-color: #ffcc80;  /* Light orange */
+}
+
+.start-timer {
+    background-color: #2196f3;  /* Blue */
     color: white;
-    padding: 10px 15px;
+    padding: 8px 12px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+    margin-right: 5px;
 }
 
-.update-form button:hover {
-    background-color: #45a049;
+.start-timer:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
-.message {
-    text-align: center;
-    margin-bottom: 15px;
-    color: #d9534f;
+.map-container {
+    height: 500px; /* Or any appropriate height */
+    width: 100%;
+    margin: 20px 0;
 }
