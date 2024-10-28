@@ -6,65 +6,23 @@ import 'leaflet/dist/leaflet.css';
 
 const MunicipalDashboard = ({ token, onLogout }) => {
     const [reports, setReports] = useState([]);
-    const [geoJsonData, setGeoJsonData] = useState(null);
-    const [sectorData, setSectorData] = useState({});
+    const [selectedReport, setSelectedReport] = useState(null);
+    const [status, setStatus] = useState('');
+    const [estimatedCompletionTime, setEstimatedCompletionTime] = useState('');
     const [message, setMessage] = useState('');
-    const [timers, setTimers] = useState({});
-    const [error, setError] = useState(null);
-    const [showMap, setShowMap] = useState(false);
 
-    const toggleMapVisibility = () => {
-        setShowMap(prevShowMap => !prevShowMap);
-    };
-
-    const fetchReports = useCallback(async () => {
-        try {
-            const response = await axios.get('http://localhost:2000/api/municipal/reports', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            setReports(response.data);
-
-            // Initialize timers for in-progress reports
-            const newTimers = {};
-            response.data.forEach(report => {
-                if (report.status === 'in-progress' && report.estimatedCompletionTime) {
-                    newTimers[report._id] = new Date(report.estimatedCompletionTime).getTime();
-                }
-            });
-            setTimers(newTimers);
-
-            const geoJsonData = {
-                type: "FeatureCollection",
-                features: response.data.map(report => {
-                    const address = report.address || '';
-                    console.log("Address:", address);
-                    const match = /(?:[Ss]ector\s*[\-]*\s*(\d+))/i.exec(address); 
-                    const sectorNumber = match ? match[1] : 'Unknown'; 
-
-                    return {
-                        type: "Feature",
-                        geometry: {
-                            type: "Point",
-                            coordinates: [report.location.longitude, report.location.latitude]
-                        },
-                        properties: {
-                            name: report.sectorName,
-                            sectorNumber: sectorNumber, 
-                            frequency: report.frequency || 0 
-                        }
-                    };
-                })
-            };
-            console.log("GeoJSON Data:", geoJsonData);
-            setGeoJsonData(geoJsonData);
-            const sectorFrequency = preprocessData(response.data);
-            console.log("Sector Frequency Data:", sectorFrequency); // Log sector data
-            setSectorData(sectorFrequency);
-        
-        } catch (error) {
-            console.error('Error fetching reports:', error);
-            setError('Error fetching reports.');
-        }
+    useEffect(() => {
+        const fetchReports = async () => {
+            try {
+                const response = await axios.get('http://localhost:2000/api/municipal/reports', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                setReports(response.data);
+            } catch (error) {
+                console.error('Error fetching reports:', error);
+            }
+        };
+        fetchReports();
     }, [token]);
 
     const preprocessData = (reports) => {
@@ -81,14 +39,35 @@ const MunicipalDashboard = ({ token, onLogout }) => {
     };
 
     useEffect(() => {
-        fetchReports();
-    }, [fetchReports]);
+        const interval = setInterval(() => {
+            setReports((prevReports) => 
+                prevReports.map(report => {
+                    if (report.status === 'completed' || report.status === 'failed') return report;
+                    const completionTime = new Date(report.estimatedCompletionTime).getTime();
+                    const currentTime = new Date().getTime();
+                    const oneDay = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+                    if (currentTime > completionTime + oneDay) {
+                        return { ...report, status: 'failed' };
+                    }
+                    return report;
+                })
+            );
+        }, 1000); 
+        return () => clearInterval(interval);
+    }, []);
 
-    const handleUpdate = async (reportId, newStatus, estimatedCompletionTime) => {
-        if (newStatus === 'in-progress' && !estimatedCompletionTime) {
-            setMessage('Please set an estimated completion time.');
-            return;
+    useEffect(() => {
+        if (selectedReport) {
+            setStatus(selectedReport.status || '');
+            setEstimatedCompletionTime(selectedReport.estimatedCompletionTime || '');
+        } else {
+            setStatus('');
+            setEstimatedCompletionTime('');
         }
+    }, [selectedReport]);
+
+    const handleUpdate = async () => {
+        if (!selectedReport) return;
         try {
             await axios.put(`http://localhost:2000/api/garbage-report/${reportId}/status`, {
                 status: newStatus,
@@ -175,61 +154,80 @@ const MunicipalDashboard = ({ token, onLogout }) => {
 
     return (
         <div className="municipal-dashboard-container">
-            <div className="dashboard-header">
-                <h2>MUNICIPAL DASHBOARD</h2>
-                <button className="logout-button" onClick={onLogout}>Logout</button>
-            </div>
-
-            {error && <p className="error-message">{error}</p>}
+            <h2>Municipal Dashboard</h2>
             {message && <p className="message">{message}</p>}
-            <div className="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Location</th>
-                            <th>Status</th>
-                            <th>Estimated Completion Time</th>
-                            <th>Actions</th>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Estimated Completion Time (in days)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {reports.map(report => (
+                        <tr
+                            key={report._id}
+                            onClick={() => report.status !== 'completed' && setSelectedReport(report)}
+                            className={`${report.status === 'completed' ? 'completed-row' : ''} ${report.status === 'failed' ? 'status-failed' : ''}`}
+                        >
+                            <td>{report._id}</td>
+                            <td>{report.address}</td>
+                            <td>
+                                {report.status}
+                                {report.status === 'failed' && <span className="warning-sign">⚠️</span>}
+                            </td>
+                            <td>{report.estimatedCompletionTime}</td>
+                            <td>
+                                <button
+                                    className="in-progress"
+                                    disabled={report.status === 'completed'}
+                                    onClick={() => setSelectedReport(report)}
+                                >
+                                    In Progress
+                                </button>
+                                <button
+                                    className="completed"
+                                    onClick={() => setStatus('completed')}
+                                    disabled={report.status === 'completed'}
+                                >
+                                    Completed
+                                </button>
+                                <button
+                                    className="delete"
+                                    onClick={() => handleDelete(report._id)}
+                                >
+                                    Delete
+                                </button>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {reports.map(report => (
-                            <tr key={report._id} className={getRowClassName(report)}>
-                                <td>{report._id}</td>
-                                <td>{report.address}</td>
-                                <td>{report.status}</td>
-                                <td>
-                                    {report.status === 'completed' || report.status === 'failed' ? '-' : 
-                                     report.status === 'in-progress' ? calculateRemainingTime(report._id) : 
-                                     <input 
-                                         type="datetime-local" 
-                                         onChange={(e) => handleUpdate(report._id, 'in-progress', e.target.value)}
-                                     />
-                                    }
-                                </td>
-                                <td>
-                                    {report.status !== 'completed' && report.status !== 'failed' && (
-                                        <button 
-                                            className="completed" 
-                                            onClick={() => handleUpdate(report._id, 'completed')}
-                                        >
-                                            Mark Completed
-                                        </button>
-                                    )}
-                                    <button className="delete" onClick={() => handleDelete(report._id)}>Delete</button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-            <button onClick={toggleMapVisibility}>
-                {showMap ? "Hide Map" : "Display Map"}
-            </button>
-            {showMap && geoJsonData && (
-                <div className="map-container">
-                    <ChoroplethMap geoJsonData={geoJsonData} sectorData={sectorData} />
+                    ))}
+                </tbody>
+            </table>
+            {selectedReport && (
+                <div className="update-form">
+                    <h3>Update Report Status</h3>
+                    <div>
+                        <label>Status:</label>
+                        <select
+                            value={status}
+                            onChange={e => setStatus(e.target.value)}
+                        >
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Estimated Completion Time:</label>
+                        <input
+                            type="text"
+                            value={estimatedCompletionTime}
+                            onChange={e => setEstimatedCompletionTime(e.target.value)}
+                        />
+                    </div>
+                    <button onClick={handleUpdate}>Update Status</button>
                 </div>
             )}
         </div>
