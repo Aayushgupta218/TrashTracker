@@ -29,30 +29,6 @@ const Main = ({ token, setToken }) => {
     );
 };
 
-const Main = ({ token, setToken }) => {
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-        setToken(null);
-        navigate('/');
-    };
-
-    return (
-        <div>
-            {token && (
-                <button className="logout-button" onClick={handleLogout}>
-                    Logout
-                </button>
-            )}
-            <Routes>
-                <Route path="/" element={<AuthPage setToken={setToken} />} />
-                <Route path="/garbage-report" element={<GarbageReport token={token} />} />
-                <Route path="/municipal-dashboard" element={<MunicipalDashboard token={token} />} />
-            </Routes>
-        </div>
-    );
-};
-
 const App = () => {
     const [token, setToken] = useState(null);
 
